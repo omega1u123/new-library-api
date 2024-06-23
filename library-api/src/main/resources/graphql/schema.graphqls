@@ -1,0 +1,28 @@
+type Book{
+    id: ID,
+    isbn: String,
+    title: String,
+    genre: String,
+    description: String,
+    author: String
+}
+
+type Query{
+    getAll: [Book],
+    getById(id: ID): Book
+}
+
+
+input BookInput {
+    isbn: String,
+    title: String,
+    genre: String,
+    description: String,
+    author: String
+}
+
+type Mutation{
+    addBook(book: BookInput): Book
+    updateBook(id: ID, updatedBook: BookInput): Book
+    removeBook(id: ID): String
+}
