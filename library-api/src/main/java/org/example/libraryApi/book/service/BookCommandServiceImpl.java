@@ -39,7 +39,7 @@ public class BookCommandServiceImpl implements BookCommandService {
     @Override
     public Book update(int id, Book book) {
         if(bookRepository.getById(id) != null){
-            var updatedBook = bookRepository.update(id, book);
+            var updatedBook = bookRepository.updateBook(id, book);
             if(updatedBook != null)
                 return updatedBook;
             return null;
