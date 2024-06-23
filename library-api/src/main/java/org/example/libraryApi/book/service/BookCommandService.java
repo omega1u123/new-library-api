@@ -8,4 +8,5 @@ public interface BookCommandService {
     void returnBook(Book book);
     boolean deleteBook(int id);
     Book update(int id, Book book);
+
 }
