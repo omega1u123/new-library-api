@@ -13,6 +13,7 @@ public interface BookRepository {
     @Query("select * from book")
     List<Book> getAll();
 
+
     @Modifying
     @Query("insert into book (isbn, title, genre, description, author) values " +
             "(:isbn, :title, :genre, :description, :author)")

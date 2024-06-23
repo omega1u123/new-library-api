@@ -28,7 +28,6 @@ public class BookCommandServiceImpl implements BookCommandService {
 
     @Override
     public void returnBook(Book book) {
-
     }
 
     @Override
