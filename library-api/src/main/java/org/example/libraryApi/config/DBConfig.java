@@ -1,4 +1,4 @@
-package org.example.mainapi.config;
+package org.example.libraryApi.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

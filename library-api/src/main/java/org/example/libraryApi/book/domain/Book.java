@@ -1,4 +1,4 @@
-package org.example.mainapi.book.domain;
+package org.example.libraryApi.book.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
