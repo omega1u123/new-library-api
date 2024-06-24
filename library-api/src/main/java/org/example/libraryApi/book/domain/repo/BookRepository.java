@@ -3,16 +3,16 @@ package org.example.libraryApi.book.domain.repo;
 import org.example.libraryApi.book.domain.Book;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface BookRepository {
+public interface BookRepository extends CrudRepository<Book, Integer> {
 
     @Query("select * from book")
     List<Book> getAll();
-
 
     @Modifying
     @Query("insert into book (isbn, title, genre, description, author) values " +
