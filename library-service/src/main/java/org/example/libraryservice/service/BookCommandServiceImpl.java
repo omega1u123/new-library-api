@@ -28,17 +28,18 @@ public class BookCommandServiceImpl implements BookCommandService{
 
     @Override
     public Book takeBook(int id) {
-        if(bookRepository.findById(id).isEmpty())
+        var bookFromDb = bookRepository.findById(id);
+        if(bookFromDb.isEmpty())
             throw new BookNotFoundException(id);
-        var bookFromDb = bookRepository.findById(id).get();
+        var book = bookFromDb.get();
         var takeDate = LocalDate.now();
         var returnDate = takeDate.plusDays(7);
         var res = bookRepository.takeBook(id, takeDate, returnDate);
         if(res == 2) {
-            bookFromDb.setTakenDate(takeDate);
-            bookFromDb.setReturnDate(returnDate);
+            book.setTakenDate(takeDate);
+            book.setReturnDate(returnDate);
         }
-        return bookFromDb;
+        return book;
     }
 
     @Override
