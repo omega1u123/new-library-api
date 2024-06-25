@@ -28,7 +28,7 @@ public interface BookRepository extends CrudRepository<Book, Integer> {
     @Query("delete from book where id=:id")
     int deleteBook(int id);
 
-    @Query("select * from book where taken_date is null ")
-    List<Book> getFreeBooks();
+    @Query("select id from book where taken_date is null ")
+    List<Integer> getFreeBooks();
 
 }
