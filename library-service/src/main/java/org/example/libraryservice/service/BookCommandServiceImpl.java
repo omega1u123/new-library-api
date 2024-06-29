@@ -47,7 +47,8 @@ public class BookCommandServiceImpl implements BookCommandService{
         if(bookRepository.findById(id).isEmpty())
             throw new BookNotFoundException(id);
         var res = bookRepository.returnBook(id);
-        if(res != 2)
+        log.info("bookRepository.returnBook return : {}", res);
+        if(res != 1)
             throw new BookNotReturnedException(id);
     }
 
