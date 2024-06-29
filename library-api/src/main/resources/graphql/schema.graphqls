@@ -10,6 +10,7 @@ type Book{
 type Query{
     getAll: [Book],
     getById(id: ID): Book
+    getAvailableBooks: [Book]
 }
 
 
@@ -25,4 +26,6 @@ type Mutation{
     addBook(book: BookInput): Book
     updateBook(id: ID, updatedBook: BookInput): Book
     removeBook(id: ID): String
+    takeBook(id: ID): String
+    returnBook(id: ID): String
 }
