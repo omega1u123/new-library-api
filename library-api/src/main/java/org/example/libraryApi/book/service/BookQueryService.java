@@ -9,5 +9,5 @@ public interface BookQueryService {
     List<Book> getAllBooks();
     Book getBookById(int id);
     Book getBookByIsbn(String isbn);
-    List<Book> getFreeBooks();
+    List<Book> getAvailableBooks() throws InterruptedException;
 }
