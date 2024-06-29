@@ -14,11 +14,6 @@ public interface BookRepository extends CrudRepository<Book, Integer> {
     @Query("select * from book")
     List<Book> getAll();
 
-    @Modifying
-    @Query("insert into book (isbn, title, genre, description, author) values " +
-            "(:isbn, :title, :genre, :description, :author)")
-    Book save(Book book);
-
     @Query("select * from book where id=:id")
     Book getById(int id);
 
