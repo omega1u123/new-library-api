@@ -7,6 +7,7 @@ import org.example.libraryApi.book.domain.repo.BookRepository;
 import org.example.libraryApi.book.exceptions.*;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +18,7 @@ public class BookCommandServiceImpl implements BookCommandService {
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Override
+    @Transactional
     public Book addBook(Book book) {
         try {
             bookRepository.save(book);
@@ -29,6 +31,7 @@ public class BookCommandServiceImpl implements BookCommandService {
     }
 
     @Override
+    @Transactional
     public void takeBook(int bookId) {
         try {
             kafkaTemplate.send("take_book-topic", String.valueOf(bookId));
@@ -47,6 +50,7 @@ public class BookCommandServiceImpl implements BookCommandService {
     }
 
     @Override
+    @Transactional
     public boolean deleteBook(int bookId) {
         kafkaTemplate.send("delete_book-topic", String.valueOf(bookId));
         if(!bookRepository.removeById(bookId))
@@ -55,6 +59,7 @@ public class BookCommandServiceImpl implements BookCommandService {
     }
 
     @Override
+    @Transactional
     public Book update(int bookId, Book book) {
         if(bookRepository.getById(bookId) != null){
             return bookRepository.updateBook(bookId, book);

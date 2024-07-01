@@ -74,7 +74,6 @@ public class BookRepositoryTests {
     void getByIsbn(){
 
         List<Book> books = books();
-        //assertThat(bookRepository.save(books.get(0))).isTrue();
 
         var isbn = books.get(0).getIsbn();
 
@@ -84,7 +83,7 @@ public class BookRepositoryTests {
 
     @Test
     void removeById(){
-        assertThat(bookRepository.removeById(1)).isTrue();
+        assertThat(bookRepository.removeById(4)).isTrue();
     }
 
     @Test
@@ -97,7 +96,7 @@ public class BookRepositoryTests {
                 "description1",
                 "author1");
 
-        assertThat(bookRepository.update(id, book)).isEqualTo(book);
+        assertThat(bookRepository.updateBook(id, book)).isEqualTo(book);
     }
 }
 

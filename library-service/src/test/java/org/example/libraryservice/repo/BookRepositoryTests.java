@@ -42,8 +42,7 @@ public class BookRepositoryTests {
 
     @Test
     public void getFreeBooks(){
-        List<Book> books = List.of(new Book(1, null, null));
-        assertEquals(books, bookRepository.getFreeBooks());
+        assertEquals(List.of(1), bookRepository.getFreeBooks());
     }
 
     @Test

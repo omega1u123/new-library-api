@@ -14,6 +14,12 @@ public class GraphqlExceptionHandler extends DataFetcherExceptionResolverAdapter
     @Override
     protected GraphQLError resolveToSingleError(Throwable ex, DataFetchingEnvironment env) {
 
+        if (ex instanceof BookNotFoundException) {
+            return GraphqlErrorBuilder.newError(env)
+                    .message(ex.getMessage())
+                    .errorType(ErrorType.BAD_REQUEST)
+                    .build();
+        }
         if (ex instanceof BookNotSavedException) {
             return GraphqlErrorBuilder.newError(env)
                     .message(ex.getMessage())

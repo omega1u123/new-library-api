@@ -46,12 +46,19 @@ public class Consumer {
 
     @KafkaListener(topics = "available_books-topic", groupId = "3")
     public void availableBooks(ConsumerRecord<String, String> record){
+
         String reqId = new String(record.headers().lastHeader("reqId").value());
         log.info("reqId : {}", reqId);
+
         List<String> booksId = bookQueryService.getFreeBooks().stream().map(String::valueOf).toList();
         log.info("booksId : {}",  String.join(",", booksId));
-        ProducerRecord<String, String> response = new ProducerRecord<>("available_books_resp-topic", String.join(",", booksId));
+
+        ProducerRecord<String, String> response = new ProducerRecord<>(
+                "available_books_resp-topic",
+                String.join(",", booksId));
+
         response.headers().add("reqId", reqId.getBytes());
+
         kafkaTemplate.send(response);
     }
 

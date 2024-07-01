@@ -11,8 +11,8 @@
     <groupId>org.example</groupId>
     <artifactId>library-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>main-api</name>
-    <description>main-api</description>
+    <name>library-api</name>
+    <description>library-api</description>
     <url/>
     <licenses>
         <license/>
@@ -38,7 +38,15 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.12.1</version>
+        </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>

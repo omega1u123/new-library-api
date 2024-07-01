@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,8 +18,7 @@ public class BookCommandServiceTests {
     @Mock
     private BookRepository bookRepository;
 
-    @Mock
-    private ModelMapper modelMapper;
+
 
     @InjectMocks
     private BookCommandServiceImpl bookCommandService;

@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.example.libraryApi.book.domain.Book;
 import org.example.libraryApi.book.domain.repo.BookRepository;
+import org.example.libraryApi.book.exceptions.BookNotFoundException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -35,13 +36,24 @@ public class BookQueryServiceImpl implements BookQueryService {
     @Override
     public Book getBookById(int id) {
         var book = bookRepository.getById(id);
+
+        if(book == null)
+            throw new BookNotFoundException();
+
         log.info("book from db: {}", book.toString());
+
         return book;
     }
 
     @Override
     public Book getBookByIsbn(String isbn) {
-        return bookRepository.getByIsbn(isbn);
+        var book = bookRepository.getByIsbn(isbn);
+
+        if(book == null){
+            throw new BookNotFoundException();
+        }
+
+        return book;
     }
 
     @SneakyThrows

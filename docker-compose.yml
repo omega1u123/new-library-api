@@ -1,5 +1,50 @@
 version: '3'
 services:
+
+  lib-api-db:
+    image: 'postgres:14'
+    container_name: 'lib-api-db'
+    ports:
+      - '5434:5432'
+    environment:
+      - 'POSTGRES_USER=omegalul'
+      - 'POSTGRES_PASSWORD=newpassword'
+      - 'POSTGRES_DB=lib-api-db'
+
+
+  lib-service-db:
+    image: 'postgres:14'
+    container_name: 'lib-service-db'
+    ports:
+      - '5435:5432'
+    environment:
+      - 'POSTGRES_USER=omegalul'
+      - 'POSTGRES_PASSWORD=newpassword'
+      - 'POSTGRES_DB=lib-service-db'
+
+  lib-api:
+    image: omegalul123/lib-api
+    container_name: lib-api
+    links:
+      - kafka
+      - lib-api-db
+    environment:
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://lib-api-db:5432/lib-api-db'
+      - 'SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092'
+
+
+  lib-service:
+    image: omegalul123/lib-service
+    container_name: lib-service
+    links:
+      - kafka
+      - lib-service-db
+    environment:
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://lib-service-db:5432/lib-service-db'
+      - 'SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092'
+
+
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
