@@ -1,34 +1,90 @@
 package org.example.libraryservice.domain.repo;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.libraryservice.domain.Book;
+import org.example.libraryservice.domain.BookMapper;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface BookRepository extends CrudRepository<Book, Integer> {
+@RequiredArgsConstructor
+@Slf4j
+public class BookRepository {
 
-    @Modifying
-    @Query("insert into book (id, taken_date, return_date) values (:id, null, null)")
-    int addBook(int id);
+    private final JdbcTemplate jdbcTemplate;
 
-    @Modifying
-    @Query("update book set taken_date=:takenDate, return_date=:returnDate where id=:id")
-    int takeBook(int id, LocalDate takenDate, LocalDate returnDate);
+    public Book getById(int id) {
+        return jdbcTemplate.query("select * from book where id=?", new BookMapper(), id)
+                .stream().findAny().orElse(null);
+    }
 
-    @Modifying
-    @Query("update book set taken_date=null, return_date=null where id=:id")
-    int returnBook(int id);
+    public int addBook(int id) {
+        try {
+            jdbcTemplate.update("insert into book (id) values (?)",
+                    id
+            );
+            return 1;
+        } catch (Exception ex) {
+            log.info("repo addBook ex: {}", ex.getMessage());
+            return 0;
+        }
+    }
 
-    @Modifying
-    @Query("delete from book where id=:id")
-    int deleteBook(int id);
+    public Book takeBook(Book book) {
+        try {
+            jdbcTemplate.update("update book set taken_date=?, return_date=? where id=?",
+                    book.getTakenDate(),
+                    book.getReturnDate(),
+                    book.getId()
+            );
+            return book;
+        } catch (Exception ex) {
+            log.info("repo takeBook ex: {}", ex.getMessage());
+            return null;
+        }
+    }
 
-    @Query("select id from book where taken_date is null ")
-    List<Integer> getFreeBooks();
+    public int returnBook(int id) {
+        try {
+            jdbcTemplate.update("update book set taken_date=?, return_date=? where id=?",
+                    null,
+                    null,
+                    id
+            );
+            return 2;
+        } catch (Exception ex) {
+            log.info("repo returnBook ex: {}", ex.getMessage());
+            return 0;
+        }
+    }
+
+    public int deleteBook(int id) {
+        try {
+            jdbcTemplate.update("delete from book where id=:?",
+                    id
+            );
+            return 3;
+        } catch (Exception ex) {
+            log.info("repo deleteBook ex: {}", ex.getMessage());
+            return 0;
+        }
+    }
+
+    public List<Integer> getFreeBooks() {
+        try {
+            return jdbcTemplate.queryForList("select id from book where taken_date is null ",
+                    Integer.class);
+        } catch (Exception ex) {
+            log.info("repo getFreeBooks ex: {}", ex.getMessage());
+            return null;
+        }
+    }
 
 }
