@@ -1,31 +1,78 @@
 package org.example.libraryApi.book.domain.repo;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.libraryApi.book.domain.Book;
-import org.springframework.data.jdbc.repository.query.Modifying;
-import org.springframework.data.jdbc.repository.query.Query;
-import org.springframework.data.repository.CrudRepository;
+import org.example.libraryApi.book.domain.BookMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface BookRepository extends CrudRepository<Book, Integer> {
+@RequiredArgsConstructor
+@Slf4j
+public class BookRepository {
 
-    @Query("select * from book")
-    List<Book> getAll();
+    private final JdbcTemplate jdbcTemplate;
 
-    @Query("select * from book where id=:id")
-    Book getById(int id);
+    public List<Book> getAll() {
+        try {
+            return jdbcTemplate.query("select * from book", new BookMapper());
+        } catch (RuntimeException ex) {
+            log.info("get all repo ex: {}", ex.getMessage());
+            return null;
+        }
+    }
 
-    @Query("select * from book where isbn=:isbn")
-    Book getByIsbn(String isbn);
+    public Book save(Book book) {
+        try {
+            jdbcTemplate.update("insert into book (isbn, title, genre, description, author) values (?, ?, ?, ?, ?)",
+                    book.getIsbn(),
+                    book.getTitle(),
+                    book.getGenre(),
+                    book.getDescription(),
+                    book.getAuthor());
+            return book;
+        } catch (Exception ex) {
+            log.info("repo save ex: {}", ex.getMessage());
+            return null;
+        }
+    }
 
-    @Modifying
-    @Query("delete from book where id=:id")
-    boolean removeById(int id);
+    public Book getById(int id) {
+        return jdbcTemplate.query("select * from book where id=?", new BookMapper(), id)
+                .stream().findAny().orElse(null);
+    }
 
-    @Modifying
-    @Query("update book set isbn=:isbn, title=:title, genre=:genre, description=:description, author=:author where id=:id")
-    Book updateBook(int id, Book book);
+    public Book getByIsbn(String isbn) {
+        return jdbcTemplate.query("select * from book where isbn=?", new BookMapper(), isbn)
+                .stream().findAny().orElse(null);
+    }
+
+
+    public boolean removeById(int id) {
+        int res = jdbcTemplate.update("delete from book where id=?", id);
+        log.info("res : {}", res);
+        return res == 1;
+    }
+
+    public Book update(int id, Book book) {
+        log.info("updated book: {}", book.toString());
+        try {
+            jdbcTemplate.update("update book set isbn=?, title=?, genre=?, description=?, author=? where id=?",
+                    book.getIsbn(),
+                    book.getTitle(),
+                    book.getGenre(),
+                    book.getDescription(),
+                    book.getAuthor(),
+                    id);
+            book.setId(id);
+            return book;
+        } catch (Exception ex) {
+            log.info("update book exception: {}", ex.getMessage());
+            return null;
+        }
+    }
 
 }
