@@ -7,7 +7,10 @@ import java.util.List;
 public interface BookQueryService {
 
     List<Book> getAllBooks();
+
     Book getBookById(int id);
+
     Book getBookByIsbn(String isbn);
-    List<Book> getAvailableBooks() throws InterruptedException;
+
+    List<Book> getAvailableBooks();
 }

@@ -28,70 +28,53 @@ public class BookController {
     private final BookCommandService bookCommandService;
 
     @QueryMapping
-    public List<Book> getAll(){
-
+    public List<Book> getAll() {
         return bookQueryService.getAllBooks();
-
     }
 
     @QueryMapping
-    public Book getById(@Argument int id){
-
+    public Book getById(@Argument int id) {
         return bookQueryService.getBookById(id);
-
     }
 
     @QueryMapping
-    public Book getByIsbn(@Argument String isbn){
-
+    public Book getByIsbn(@Argument String isbn) {
         return bookQueryService.getBookByIsbn(isbn);
-
     }
 
 
     @SneakyThrows
     @QueryMapping
-    public List<Book> getAvailableBooks(){
-
+    public List<Book> getAvailableBooks() {
         return bookQueryService.getAvailableBooks();
-
     }
 
     @MutationMapping
-    public Book addBook(@Argument Book book){
-
+    public Book addBook(@Argument Book book) {
         return bookCommandService.addBook(book);
-
     }
 
     @MutationMapping
-    public Book updateBook(@Argument int id, @Argument Book updatedBook){
-
+    public Book updateBook(@Argument int id, @Argument Book updatedBook) {
         return bookCommandService.update(id, updatedBook);
-
     }
 
     @MutationMapping
-    public String removeBook(@Argument int id){
-
+    public String removeBook(@Argument int id) {
         bookCommandService.deleteBook(id);
         return "book deleted";
-
     }
 
     @MutationMapping
-    public String takeBook(@Argument int id){
-
+    public String takeBook(@Argument int id) {
         bookCommandService.takeBook(id);
         return "book was took";
     }
 
     @MutationMapping
-    public String returnBook(@Argument int id){
-
-         bookCommandService.returnBook(id);
-            return "book returned";
-
+    public String returnBook(@Argument int id) {
+        bookCommandService.returnBook(id);
+        return "book returned";
     }
 
 }
