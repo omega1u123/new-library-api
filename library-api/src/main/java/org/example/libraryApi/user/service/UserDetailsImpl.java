@@ -1,6 +1,7 @@
 package org.example.libraryApi.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.libraryApi.security.UserRoles;
 import org.example.libraryApi.user.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,7 +18,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("USER"));
+        return List.of(new SimpleGrantedAuthority(UserRoles.USER.toString()));
     }
 
     @Override
