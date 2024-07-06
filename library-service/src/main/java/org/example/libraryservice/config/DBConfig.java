@@ -9,13 +9,10 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableJdbcRepositories
-public class DBConfig{
+public class DBConfig {
 
     @Bean
-    public JdbcTemplate jdbcTemplate(DataSource dataSource){
+    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
-
-
-
 }
