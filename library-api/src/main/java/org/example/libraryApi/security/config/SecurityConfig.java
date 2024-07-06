@@ -1,6 +1,7 @@
-package org.example.libraryApi.security;
+package org.example.libraryApi.security.config;
 
 import lombok.RequiredArgsConstructor;
+import org.example.libraryApi.security.JwtSecurityFilter;
 import org.example.libraryApi.user.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
