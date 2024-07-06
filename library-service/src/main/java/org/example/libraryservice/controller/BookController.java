@@ -16,11 +16,7 @@ public class BookController {
 
     @GetMapping("/getFreeBooks")
     public ResponseEntity<?> getFreeBooks() {
-        try {
-            return ResponseEntity.ok(bookQueryService.getFreeBooks());
-        } catch (BookNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+        return ResponseEntity.ok(bookQueryService.getFreeBooks());
     }
 
 }
