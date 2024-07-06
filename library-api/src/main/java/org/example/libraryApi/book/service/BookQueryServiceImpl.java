@@ -1,22 +1,14 @@
 package org.example.libraryApi.book.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.producer.ProducerRecord;
+import org.example.libraryApi.book.externalApi.LibraryServiceApi;
 import org.example.libraryApi.book.domain.Book;
 import org.example.libraryApi.book.domain.repo.BookRepository;
 import org.example.libraryApi.book.exceptions.BookNotFoundException;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -24,9 +16,7 @@ import java.util.stream.Stream;
 public class BookQueryServiceImpl implements BookQueryService {
 
     private final BookRepository bookRepository;
-    private final ConcurrentHashMap<String, List<Integer>> response = new ConcurrentHashMap<>();
-    private final KafkaTemplate<String, String> kafkaTemplate;
-
+    private final LibraryServiceApi libraryServiceApi;
 
     @Override
     public List<Book> getAllBooks() {
@@ -37,9 +27,9 @@ public class BookQueryServiceImpl implements BookQueryService {
     public Book getBookById(int id) {
         var book = bookRepository.getById(id);
 
-        if(book == null)
+        if (book == null) {
             throw new BookNotFoundException();
-
+        }
         log.info("book from db: {}", book.toString());
 
         return book;
@@ -49,59 +39,19 @@ public class BookQueryServiceImpl implements BookQueryService {
     public Book getBookByIsbn(String isbn) {
         var book = bookRepository.getByIsbn(isbn);
 
-        if(book == null){
+        if (book == null) {
             throw new BookNotFoundException();
         }
 
         return book;
     }
 
-    @SneakyThrows
     @Override
-    public List<Book> getAvailableBooks(){
-
-        String reqId = UUID.randomUUID().toString();
-
-        ProducerRecord<String, String> record = new ProducerRecord<>("available_books-topic", "");
-        record.headers().add("reqId", reqId.getBytes());
-
-        kafkaTemplate.send(record);
-
-        while (!response.containsKey(reqId)){
-            Thread.sleep(100);
+    public List<Book> getAvailableBooks() {
+        var response = libraryServiceApi.getFreeBooks();
+        if (response.getStatusCode().is4xxClientError() || response.getBody() == null) {
+            throw new BookNotFoundException();
         }
-
-        if(response.get(reqId).get(0) == -1)
-            return null;
-
-        List<Book> books = new ArrayList<>();
-
-        for(Integer bookId : response.get(reqId)){
-            books.add(getBookById(bookId));
-        }
-
-        response.remove(reqId);
-
-        return books;
-    }
-
-    @KafkaListener(topics = "available_books_resp-topic", groupId = "4")
-    public void listen(ConsumerRecord<String, String> record){
-
-        String reqId = new String(record.headers().lastHeader("reqId").value());
-
-        try {
-
-            List<Integer> books = Stream.of(record.value().split(",")).map(Integer::parseInt).toList();
-
-            log.info("message from available_books_resp-topic : {}", books);
-
-            response.put(reqId, books);
-
-        }catch (NumberFormatException ex){
-
-            response.put(reqId, List.of(-1));
-
-        }
+        return response.getBody().stream().map(bookRepository::getById).toList();
     }
 }
