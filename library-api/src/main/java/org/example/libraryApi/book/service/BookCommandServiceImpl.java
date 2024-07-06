@@ -23,19 +23,19 @@ public class BookCommandServiceImpl implements BookCommandService {
         try {
             bookRepository.save(book);
             log.info("sending mess tp add_book-topic");
+            book.setId(bookRepository.getByIsbn(book.getIsbn()).getId());
             kafkaTemplate.send("add_book-topic", String.valueOf(book.getId()));
             return book;
-        }catch (RuntimeException ex){
+        } catch (RuntimeException ex) {
             throw new BookNotSavedException();
         }
     }
 
     @Override
-    @Transactional
     public void takeBook(int bookId) {
         try {
             kafkaTemplate.send("take_book-topic", String.valueOf(bookId));
-        }catch (RuntimeException ex){
+        } catch (RuntimeException ex) {
             throw new BookNotTookException();
         }
     }
@@ -44,7 +44,7 @@ public class BookCommandServiceImpl implements BookCommandService {
     public void returnBook(int bookId) {
         try {
             kafkaTemplate.send("return_book-topic", String.valueOf(bookId));
-        }catch (RuntimeException ex){
+        } catch (RuntimeException ex) {
             throw new BookNotReturnedException();
         }
     }
@@ -53,17 +53,18 @@ public class BookCommandServiceImpl implements BookCommandService {
     @Transactional
     public boolean deleteBook(int bookId) {
         kafkaTemplate.send("delete_book-topic", String.valueOf(bookId));
-        if(!bookRepository.removeById(bookId))
+        if (!bookRepository.removeById(bookId)) {
             throw new BookNotDeletedException();
+        }
         return true;
     }
 
     @Override
     @Transactional
     public Book update(int bookId, Book book) {
-        if(bookRepository.getById(bookId) != null){
-            return bookRepository.updateBook(bookId, book);
-        }else{
+        if (bookRepository.getById(bookId) != null) {
+            return bookRepository.update(bookId, book);
+        } else {
             throw new BookNotUpdatedException();
         }
     }
