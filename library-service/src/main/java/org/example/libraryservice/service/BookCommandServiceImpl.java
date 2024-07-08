@@ -4,13 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.libraryservice.domain.Book;
 import org.example.libraryservice.domain.repo.BookRepository;
-import org.example.libraryservice.exception.BookNotDeletedException;
-import org.example.libraryservice.exception.BookNotFoundException;
-import org.example.libraryservice.exception.BookNotReturnedException;
-import org.example.libraryservice.exception.BookNotSavedException;
+import org.example.libraryservice.exception.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -21,51 +19,51 @@ public class BookCommandServiceImpl implements BookCommandService {
 
     @Override
     public void addBook(int id) {
-        var res = bookRepository.addBook(id);
-        if (res != 1) {
+        try {
+            bookRepository.addBook(id);
+        } catch (BookNotSavedDbException ex) {
             throw new BookNotSavedException();
         }
     }
 
     @Override
     public Book takeBook(int id) {
-        var bookFromDb = bookRepository.getById(id);
-        if (bookFromDb == null) {
-            throw new BookNotFoundException(id);
+        try {
+            var bookFromDb = bookRepository.getById(id);
+            var takeDate = LocalDate.now();
+            var returnDate = takeDate.plusDays(7);
+            bookFromDb.setTakenDate(takeDate);
+            bookFromDb.setReturnDate(returnDate);
+            return bookRepository.takeBook(bookFromDb);
+        } catch (NoSuchElementException ex) {
+            throw new BookNotFoundException();
+        } catch (BookNotTakenDbException ex) {
+            throw new BookNotTakenException();
         }
-
-        var takeDate = LocalDate.now();
-        var returnDate = takeDate.plusDays(7);
-
-        bookFromDb.setTakenDate(takeDate);
-        bookFromDb.setReturnDate(returnDate);
-
-        return bookRepository.takeBook(bookFromDb);
     }
 
     @Override
     public void returnBook(int id) {
-        if (bookRepository.getById(id) == null)
-            throw new BookNotFoundException(id);
-
-        var res = bookRepository.returnBook(id);
-        log.info("bookRepository.returnBook return : {}", res);
-        if (res != 2) {
+        try {
+            bookRepository.getById(id);
+            bookRepository.returnBook(id);
+        } catch (NoSuchElementException ex) {
+            throw new BookNotFoundException();
+        } catch (BookNotReturnedDbException ex) {
             throw new BookNotReturnedException(id);
         }
     }
 
     @Override
-    public boolean deleteBook(int id) {
-        if (bookRepository.getById(id) == null)
-            throw new BookNotFoundException(id);
-
-        var res = bookRepository.deleteBook(id);
-        if (res != 3) {
+    public void deleteBook(int id) {
+        try {
+            bookRepository.getById(id);
+            bookRepository.deleteBook(id);
+        } catch (NoSuchElementException ex) {
+            throw new BookNotFoundException();
+        } catch (BookNotDeletedDbException ex) {
             throw new BookNotDeletedException(id);
         }
-
-        return true;
     }
 
 }
