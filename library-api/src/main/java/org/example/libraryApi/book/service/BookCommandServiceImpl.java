@@ -9,6 +9,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.NoSuchElementException;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -26,7 +28,7 @@ public class BookCommandServiceImpl implements BookCommandService {
             book.setId(bookRepository.getByIsbn(book.getIsbn()).getId());
             kafkaTemplate.send("add_book-topic", String.valueOf(book.getId()));
             return book;
-        } catch (RuntimeException ex) {
+        } catch (BookNotSavedDbException ex) {
             throw new BookNotSavedException();
         }
     }
@@ -62,9 +64,12 @@ public class BookCommandServiceImpl implements BookCommandService {
     @Override
     @Transactional
     public Book update(int bookId, Book book) {
-        if (bookRepository.getById(bookId) != null) {
+        try {
+            bookRepository.getById(bookId);
             return bookRepository.update(bookId, book);
-        } else {
+        } catch (NoSuchElementException ex) {
+            throw new BookNotFoundException();
+        } catch (BookNotUpdatedDbException ex) {
             throw new BookNotUpdatedException();
         }
     }
