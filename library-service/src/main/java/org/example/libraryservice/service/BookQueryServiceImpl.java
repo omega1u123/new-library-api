@@ -2,6 +2,7 @@ package org.example.libraryservice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.libraryservice.domain.repo.BookRepository;
+import org.example.libraryservice.exception.BookNotFoundDbException;
 import org.example.libraryservice.exception.BookNotFoundException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -16,10 +17,15 @@ public class BookQueryServiceImpl implements BookQueryService {
 
     @Override
     public List<Integer> getFreeBooks() {
-        List<Integer> freeBooks = bookRepository.getFreeBooks();
-        if (freeBooks == null) {
+        try {
+            List<Integer> freeBooks = bookRepository.getFreeBooks();
+            if (freeBooks.isEmpty()) {
+                throw new BookNotFoundException();
+            }
+            return freeBooks;
+        } catch (BookNotFoundDbException ex) {
             throw new BookNotFoundException();
         }
-        return freeBooks;
+
     }
 }
