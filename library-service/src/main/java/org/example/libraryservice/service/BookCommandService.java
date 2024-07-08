@@ -10,6 +10,6 @@ public interface BookCommandService {
 
     void returnBook(int id);
 
-    boolean deleteBook(int id);
+    void deleteBook(int id);
 
 }
