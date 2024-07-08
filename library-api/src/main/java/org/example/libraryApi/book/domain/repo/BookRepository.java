@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.libraryApi.book.domain.Book;
 import org.example.libraryApi.book.domain.BookMapper;
+import org.example.libraryApi.book.exceptions.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -21,7 +22,7 @@ public class BookRepository {
             return jdbcTemplate.query("select * from book", new BookMapper());
         } catch (RuntimeException ex) {
             log.info("get all repo ex: {}", ex.getMessage());
-            return null;
+            return List.of();
         }
     }
 
@@ -36,18 +37,18 @@ public class BookRepository {
             return book;
         } catch (Exception ex) {
             log.info("repo save ex: {}", ex.getMessage());
-            return null;
+            throw new BookNotSavedDbException();
         }
     }
 
     public Book getById(int id) {
         return jdbcTemplate.query("select * from book where id=?", new BookMapper(), id)
-                .stream().findAny().orElse(null);
+                .stream().findAny().orElseThrow();
     }
 
     public Book getByIsbn(String isbn) {
         return jdbcTemplate.query("select * from book where isbn=?", new BookMapper(), isbn)
-                .stream().findAny().orElse(null);
+                .stream().findAny().orElseThrow();
     }
 
 
@@ -71,7 +72,7 @@ public class BookRepository {
             return book;
         } catch (Exception ex) {
             log.info("update book exception: {}", ex.getMessage());
-            return null;
+            throw new BookNotUpdatedDbException();
         }
     }
 
