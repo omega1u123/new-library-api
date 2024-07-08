@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.libraryservice.domain.Book;
 import org.example.libraryservice.domain.BookMapper;
+import org.example.libraryservice.exception.*;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -22,7 +23,7 @@ public class BookRepository {
 
     public Book getById(int id) {
         return jdbcTemplate.query("select * from book where id=?", new BookMapper(), id)
-                .stream().findAny().orElse(null);
+                .stream().findAny().orElseThrow();
     }
 
     public int addBook(int id) {
@@ -33,7 +34,7 @@ public class BookRepository {
             return 1;
         } catch (Exception ex) {
             log.info("repo addBook ex: {}", ex.getMessage());
-            return 0;
+            throw new BookNotSavedDbException();
         }
     }
 
@@ -47,7 +48,7 @@ public class BookRepository {
             return book;
         } catch (Exception ex) {
             log.info("repo takeBook ex: {}", ex.getMessage());
-            return null;
+            throw new BookNotTakenDbException();
         }
     }
 
@@ -61,7 +62,7 @@ public class BookRepository {
             return 2;
         } catch (Exception ex) {
             log.info("repo returnBook ex: {}", ex.getMessage());
-            return 0;
+            throw new BookNotReturnedDbException();
         }
     }
 
@@ -73,7 +74,7 @@ public class BookRepository {
             return 3;
         } catch (Exception ex) {
             log.info("repo deleteBook ex: {}", ex.getMessage());
-            return 0;
+            throw new BookNotDeletedDbException();
         }
     }
 
@@ -83,7 +84,7 @@ public class BookRepository {
                     Integer.class);
         } catch (Exception ex) {
             log.info("repo getFreeBooks ex: {}", ex.getMessage());
-            return null;
+            throw new BookNotFoundDbException();
         }
     }
 
