@@ -9,6 +9,7 @@ import org.example.libraryApi.book.exceptions.BookNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -20,30 +21,29 @@ public class BookQueryServiceImpl implements BookQueryService {
 
     @Override
     public List<Book> getAllBooks() {
-        return bookRepository.getAll();
+        var books = bookRepository.getAll();
+        if (books.isEmpty()) {
+            throw new BookNotFoundException();
+        }
+        return books;
     }
 
     @Override
     public Book getBookById(int id) {
-        var book = bookRepository.getById(id);
-
-        if (book == null) {
+        try {
+            return bookRepository.getById(id);
+        } catch (NoSuchElementException ex) {
             throw new BookNotFoundException();
         }
-        log.info("book from db: {}", book.toString());
-
-        return book;
     }
 
     @Override
     public Book getBookByIsbn(String isbn) {
-        var book = bookRepository.getByIsbn(isbn);
-
-        if (book == null) {
+        try {
+            return bookRepository.getByIsbn(isbn);
+        } catch (NoSuchElementException ex) {
             throw new BookNotFoundException();
         }
-
-        return book;
     }
 
     @Override
