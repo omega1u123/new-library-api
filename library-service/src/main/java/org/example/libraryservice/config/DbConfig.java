@@ -9,7 +9,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableJdbcRepositories
-public class DBConfig {
+public class DbConfig {
 
     @Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
