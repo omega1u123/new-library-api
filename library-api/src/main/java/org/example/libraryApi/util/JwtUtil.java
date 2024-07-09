@@ -5,8 +5,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.libraryApi.security.UserRoles;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -18,32 +21,20 @@ import java.time.ZoneId;
 import java.util.Date;
 
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class JwtUtil {
 
-    private final SecretKey jwtAccessSecret;
-    private final SecretKey jwtRefreshSecret;
-    private final int accessTokenExpirationDays;
-    private final int refreshTokenExpirationDays;
-
-    public JwtUtil(
-            @Value("${jwt.secret.access}") String jwtAccessSecret,
-            @Value("${jwt.secret.refresh}") String jwtRefreshSecret,
-            @Value("${accessToken.expiration.days}") int accessTokenExpirationDays,
-            @Value("${refreshToken.expiration.days}") int refreshTokenExpirationDays) {
-        this.jwtAccessSecret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtAccessSecret));
-        this.jwtRefreshSecret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtRefreshSecret));
-        this.accessTokenExpirationDays = accessTokenExpirationDays;
-        this.refreshTokenExpirationDays = refreshTokenExpirationDays;
-    }
+    private final JwtProperties jwtProperties;
 
     public String generateAccessToken(@NonNull UserDetails user) {
         final LocalDateTime now = LocalDateTime.now();
-        final Instant accessExpirationInstant = now.plusDays(accessTokenExpirationDays).atZone(ZoneId.systemDefault()).toInstant();
+        final Instant accessExpirationInstant = now.plusDays(jwtProperties.getAccessTokenExpirationDays()).atZone(ZoneId.systemDefault()).toInstant();
         final Date accessExpiration = Date.from(accessExpirationInstant);
         return Jwts.builder()
                 .subject(user.getUsername())
                 .expiration(accessExpiration)
-                .signWith(jwtAccessSecret)
+                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecretAccess())))
                 .claim("roles", UserRoles.USER)
                 .compact();
     }
@@ -51,21 +42,21 @@ public class JwtUtil {
 
     public String generateRefreshToken(@NonNull UserDetails user) {
         final LocalDateTime now = LocalDateTime.now();
-        final Instant refreshExpirationInstant = now.plusDays(refreshTokenExpirationDays).atZone(ZoneId.systemDefault()).toInstant();
+        final Instant refreshExpirationInstant = now.plusDays(jwtProperties.getRefreshTokenExpirationDays()).atZone(ZoneId.systemDefault()).toInstant();
         final Date refreshExpiration = Date.from(refreshExpirationInstant);
         return Jwts.builder()
                 .subject(user.getUsername())
                 .expiration(refreshExpiration)
-                .signWith(jwtRefreshSecret)
+                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecretRefresh())))
                 .compact();
     }
 
     public boolean validateAccessToken(@NonNull String accessToken) {
-        return validateToken(accessToken, jwtAccessSecret);
+        return validateToken(accessToken, Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecretAccess())));
     }
 
     public boolean validateRefreshToken(@NonNull String refreshToken) {
-        return validateToken(refreshToken, jwtRefreshSecret);
+        return validateToken(refreshToken, Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecretRefresh())));
     }
 
     private boolean validateToken(@NonNull String token, @NonNull Key secret) {
@@ -82,11 +73,11 @@ public class JwtUtil {
 
 
     public Claims getAccessClaims(@NonNull String token) {
-        return getClaims(token, jwtAccessSecret);
+        return getClaims(token, Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecretAccess())));
     }
 
     public Claims getRefreshClaims(@NonNull String token) {
-        return getClaims(token, jwtRefreshSecret);
+        return getClaims(token, Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecretRefresh())));
     }
 
     private Claims getClaims(@NonNull String token, @NonNull Key secret) {
