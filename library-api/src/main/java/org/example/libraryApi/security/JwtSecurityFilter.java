@@ -35,14 +35,14 @@ public class JwtSecurityFilter extends OncePerRequestFilter {
         String jwt = null;
 
         if (authHeader != null && authHeader.startsWith(BEARER)) {
-            jwt = authHeader.substring(7);
+            jwt = authHeader.substring(BEARER.length());
             try {
                 jwtUtil.validateAccessToken(jwt);
                 username = jwtUtil.getAccessClaims(jwt).getSubject();
             } catch (ExpiredJwtException e) {
-                log.debug("Время жизни токена вышло");
+                log.debug("token expired");
             } catch (SignatureException e) {
-                log.debug("Подпись неправильная");
+                log.debug("invalid signature");
             }
         }
 
