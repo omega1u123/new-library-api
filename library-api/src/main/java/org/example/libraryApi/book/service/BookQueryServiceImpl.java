@@ -21,11 +21,7 @@ public class BookQueryServiceImpl implements BookQueryService {
 
     @Override
     public List<Book> getAllBooks() {
-        var books = bookRepository.getAll();
-        if (books.isEmpty()) {
-            throw new BookNotFoundException();
-        }
-        return books;
+        return bookRepository.getAll();
     }
 
     @Override
